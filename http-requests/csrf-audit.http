@@ -1,0 +1,79 @@
+### 1. SHOW ALL flowers
+GET http://localhost:8080/api/v1/flowers
+Authorization: Basic admin admin
+Accept: application/json
+
+> {%
+    client.test("1. Show all -> 200", function () {
+        client.assert(response.status === 200, "Expected 200");
+    });
+    client.global.set("existingId", response.body[0].id);
+%}
+
+###
+
+### 2. READ ONE flower
+GET http://localhost:8080/api/v1/flowers/{{existingId}}
+Authorization: Basic admin admin
+Accept: application/json
+
+> {%
+    client.test("2. Read one -> 200", function () {
+        client.assert(response.status === 200, "Expected 200");
+    });
+%}
+
+###
+
+### 3. CREATE one flower
+POST http://localhost:8080/api/v1/flowers
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+  "name": "Purple Orchid",
+  "category": "ORCHID",
+  "price": 12.0,
+  "stock": 25,
+  "description": "Elegant purple orchid in a pot"
+}
+
+> {%
+    client.test("3. Create one -> 201", function () {
+        client.assert(response.status === 201, "Expected 201");
+    });
+    client.global.set("newId", response.body.id);
+%}
+
+###
+
+### 4. UPDATE one flower
+PUT http://localhost:8080/api/v1/flowers/{{newId}}
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+  "name": "Purple Orchid",
+  "category": "ORCHID",
+  "price": 14.5,
+  "stock": 20,
+  "description": "Elegant purple orchid, new price"
+}
+
+> {%
+    client.test("4. Update one -> 200", function () {
+        client.assert(response.status === 200, "Expected 200");
+    });
+%}
+
+###
+
+### 5. DELETE one flower
+DELETE http://localhost:8080/api/v1/flowers/{{newId}}
+Authorization: Basic admin admin
+
+> {%
+    client.test("5. Delete one -> 204", function () {
+        client.assert(response.status === 204, "Expected 204");
+    });
+%}

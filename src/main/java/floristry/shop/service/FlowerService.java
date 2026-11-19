@@ -14,34 +14,46 @@ import java.util.List;
 public class FlowerService {
 
     private final FlowerRepository repository;
+    private final AuditService audit;
 
     public List<Flower> findAll() {
+        audit.log("READ_ALL", null);
         return repository.findAll();
     }
 
     public Flower findById(String id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Flower not found: " + id));
+        audit.log("READ", id);
+        return getOrThrow(id);
     }
 
     public Flower create(Flower flower) {
         flower.setId(null);
-        return repository.save(flower);
+        Flower saved = repository.save(flower);
+        audit.log("CREATE", saved.getId());
+        return saved;
     }
 
     public Flower update(String id, Flower flower) {
-        Flower existing = findById(id);
+        Flower existing = getOrThrow(id);
         existing.setName(flower.getName());
         existing.setCategory(flower.getCategory());
         existing.setPrice(flower.getPrice());
         existing.setStock(flower.getStock());
         existing.setDescription(flower.getDescription());
-        return repository.save(existing);
+        Flower saved = repository.save(existing);
+        audit.log("UPDATE", id);
+        return saved;
     }
 
     public void delete(String id) {
-        findById(id);
+        getOrThrow(id);
         repository.deleteById(id);
+        audit.log("DELETE", id);
+    }
+
+    private Flower getOrThrow(String id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Flower not found: " + id));
     }
 }
