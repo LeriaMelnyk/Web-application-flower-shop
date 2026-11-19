@@ -1,0 +1,139 @@
+### 1. GET all flowers WITHOUT auth -> 401
+GET http://localhost:8080/api/v1/flowers
+Accept: application/json
+
+> {%
+    client.test("1. No auth -> 401", function () {
+        client.assert(response.status === 401, "Expected 401");
+    });
+%}
+
+###
+
+### 2. GET all flowers as admin -> 200
+GET http://localhost:8080/api/v1/flowers
+Authorization: Basic admin admin
+Accept: application/json
+
+> {%
+    client.test("2. Admin reads all -> 200", function () {
+        client.assert(response.status === 200, "Expected 200");
+    });
+%}
+
+###
+
+### 3. GET all flowers with WRONG password -> 401
+GET http://localhost:8080/api/v1/flowers
+Authorization: Basic admin wrongpass
+Accept: application/json
+
+> {%
+    client.test("3. Wrong password -> 401", function () {
+        client.assert(response.status === 401, "Expected 401");
+    });
+%}
+
+###
+
+### 4. GET hello as user -> 200
+GET http://localhost:8080/api/v1/flowers/hello
+Authorization: Basic user user
+
+> {%
+    client.test("4. User hello -> 200", function () {
+        client.assert(response.status === 200, "Expected 200");
+    });
+%}
+
+###
+
+### 5. GET hello WITHOUT auth -> 401
+GET http://localhost:8080/api/v1/flowers/hello
+
+> {%
+    client.test("5. Hello no auth -> 401", function () {
+        client.assert(response.status === 401, "Expected 401");
+    });
+%}
+
+###
+
+### 6. CREATE flower as admin -> 201
+POST http://localhost:8080/api/v1/flowers
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+  "name": "Blue Hydrangea",
+  "category": "HYDRANGEA",
+  "price": 5.5,
+  "stock": 40,
+  "description": "Big blue hydrangea bush"
+}
+
+> {%
+    client.test("6. Admin creates -> 201", function () {
+        client.assert(response.status === 201, "Expected 201");
+    });
+    client.global.set("flowerId", response.body.id);
+%}
+
+###
+
+### 7. GET one flower as user -> 200
+GET http://localhost:8080/api/v1/flowers/{{flowerId}}
+Authorization: Basic user user
+Accept: application/json
+
+> {%
+    client.test("7. User reads one -> 200", function () {
+        client.assert(response.status === 200, "Expected 200");
+    });
+%}
+
+###
+
+### 8. UPDATE flower as superadmin -> 200
+PUT http://localhost:8080/api/v1/flowers/{{flowerId}}
+Authorization: Basic superadmin superadmin
+Content-Type: application/json
+
+{
+  "name": "Blue Hydrangea",
+  "category": "HYDRANGEA",
+  "price": 6.9,
+  "stock": 35,
+  "description": "Updated price"
+}
+
+> {%
+    client.test("8. Superadmin updates -> 200", function () {
+        client.assert(response.status === 200, "Expected 200");
+    });
+%}
+
+###
+
+### 9. DELETE flower as admin -> 204
+DELETE http://localhost:8080/api/v1/flowers/{{flowerId}}
+Authorization: Basic admin admin
+
+> {%
+    client.test("9. Admin deletes -> 204", function () {
+        client.assert(response.status === 204, "Expected 204");
+    });
+%}
+
+###
+
+### 10. GET deleted flower as admin -> 404
+GET http://localhost:8080/api/v1/flowers/{{flowerId}}
+Authorization: Basic admin admin
+Accept: application/json
+
+> {%
+    client.test("10. Deleted flower -> 404", function () {
+        client.assert(response.status === 404, "Expected 404");
+    });
+%}
