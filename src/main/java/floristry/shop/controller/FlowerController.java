@@ -20,6 +20,21 @@ public class FlowerController {
         return "Welcome to the flower shop! Fresh bouquets every day.";
     }
 
+    @GetMapping("/hello/user")
+    public String helloUser() {
+        return "Welcome to the flower shop, dear customer! Browse our bouquets.";
+    }
+
+    @GetMapping("/hello/admin")
+    public String helloAdmin() {
+        return "Hello, Admin! Fresh roses just arrived, time to update the stock.";
+    }
+
+    @GetMapping("/hello/superadmin")
+    public String helloSuperadmin() {
+        return "Greetings, Superadmin! The whole garden is in your hands.";
+    }
+
     @GetMapping
     public List<Flower> getAll() {
         return service.findAll();
