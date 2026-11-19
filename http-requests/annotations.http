@@ -1,0 +1,123 @@
+### 1. USER -> /me (isAuthenticated) -> 200
+GET http://localhost:8080/api/v1/flowers/me
+Authorization: Basic user user
+Accept: application/json
+
+> {%
+    client.test("1. USER /me -> 200", function () {
+        client.assert(response.status === 200, "Got " + response.status);
+    });
+%}
+
+###
+
+### 2. ADMIN -> /me -> 200
+GET http://localhost:8080/api/v1/flowers/me
+Authorization: Basic admin admin
+Accept: application/json
+
+> {%
+    client.test("2. ADMIN /me -> 200", function () {
+        client.assert(response.status === 200, "Got " + response.status);
+    });
+%}
+
+###
+
+### 3. SUPERADMIN -> /me -> 200
+GET http://localhost:8080/api/v1/flowers/me
+Authorization: Basic superadmin superadmin
+Accept: application/json
+
+> {%
+    client.test("3. SUPERADMIN /me -> 200", function () {
+        client.assert(response.status === 200, "Got " + response.status);
+    });
+%}
+
+###
+
+### 4. USER -> /low-stock (ADMIN, SUPERADMIN only) -> 403
+GET http://localhost:8080/api/v1/flowers/low-stock
+Authorization: Basic user user
+Accept: application/json
+
+> {%
+    client.test("4. USER /low-stock -> 403", function () {
+        client.assert(response.status === 403, "Got " + response.status);
+    });
+%}
+
+###
+
+### 5. ADMIN -> /low-stock -> 200
+GET http://localhost:8080/api/v1/flowers/low-stock
+Authorization: Basic admin admin
+Accept: application/json
+
+> {%
+    client.test("5. ADMIN /low-stock -> 200", function () {
+        client.assert(response.status === 200, "Got " + response.status);
+    });
+%}
+
+###
+
+### 6. ADMIN -> /hello/user (USER only) -> 403
+GET http://localhost:8080/api/v1/flowers/hello/user
+Authorization: Basic admin admin
+
+> {%
+    client.test("6. ADMIN /hello/user -> 403", function () {
+        client.assert(response.status === 403, "Got " + response.status);
+    });
+%}
+
+###
+
+### 7. ADMIN -> /hello/admin -> 200
+GET http://localhost:8080/api/v1/flowers/hello/admin
+Authorization: Basic admin admin
+
+> {%
+    client.test("7. ADMIN /hello/admin -> 200", function () {
+        client.assert(response.status === 200, "Got " + response.status);
+    });
+%}
+
+###
+
+### 8. ADMIN -> DELETE (@Secured SUPERADMIN) -> 403
+DELETE http://localhost:8080/api/v1/flowers/any-id
+Authorization: Basic admin admin
+
+> {%
+    client.test("8. ADMIN DELETE -> 403", function () {
+        client.assert(response.status === 403, "Got " + response.status);
+    });
+%}
+
+###
+
+### 9. SUPERADMIN -> /hello/superadmin (@Secured) -> 200
+GET http://localhost:8080/api/v1/flowers/hello/superadmin
+Authorization: Basic superadmin superadmin
+
+> {%
+    client.test("9. SUPERADMIN /hello/superadmin -> 200", function () {
+        client.assert(response.status === 200, "Got " + response.status);
+    });
+%}
+
+###
+
+### 10. USER -> /audit (SUPERADMIN only) -> 403
+GET http://localhost:8080/api/v1/audit
+Authorization: Basic user user
+Accept: application/json
+
+> {%
+    client.test("10. USER /audit -> 403", function () {
+        client.assert(response.status === 403, "Got " + response.status);
+    });
+%}
