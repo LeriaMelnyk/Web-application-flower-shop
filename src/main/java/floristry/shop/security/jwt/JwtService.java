@@ -1,5 +1,6 @@
 package floristry.shop.security.jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -31,6 +32,15 @@ public class JwtService {
                 .expiration(new Date(now + expiration))
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    /** Перевіряє підпис і термін дії; при помилці кидає JwtException. */
+    public Claims parseToken(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private SecretKey getSigningKey() {

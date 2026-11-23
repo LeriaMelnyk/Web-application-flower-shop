@@ -1,0 +1,91 @@
+### 1. Login user
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{ "username": "user", "password": "user" }
+
+> {% client.global.set("userToken", response.body.token); %}
+
+###
+
+### 2. Login admin
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{ "username": "admin", "password": "admin" }
+
+> {% client.global.set("adminToken", response.body.token); %}
+
+###
+
+### 3. Login superadmin
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{ "username": "superadmin", "password": "superadmin" }
+
+> {% client.global.set("superToken", response.body.token); %}
+
+###
+
+### 4. USER /me -> 200
+GET http://localhost:8080/api/v1/flowers/me
+Authorization: Bearer {{userToken}}
+
+> {% client.test("4 -> 200", function () { client.assert(response.status === 200, "Got " + response.status); }); %}
+
+###
+
+### 5. No token -> 401
+GET http://localhost:8080/api/v1/flowers
+
+> {% client.test("5 -> 401", function () { client.assert(response.status === 401, "Got " + response.status); }); %}
+
+###
+
+### 6. USER creates -> 403
+POST http://localhost:8080/api/v1/flowers
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{ "name": "Purple Orchid", "category": "ORCHID", "price": 12.0, "stock": 25, "description": "Orchid" }
+
+> {% client.test("6 -> 403", function () { client.assert(response.status === 403, "Got " + response.status); }); %}
+
+###
+
+### 7. ADMIN creates -> 201
+POST http://localhost:8080/api/v1/flowers
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "name": "Purple Orchid", "category": "ORCHID", "price": 12.0, "stock": 25, "description": "Orchid" }
+
+> {%
+    client.test("7 -> 201", function () { client.assert(response.status === 201, "Got " + response.status); });
+    client.global.set("flowerId", response.body.id);
+%}
+
+###
+
+### 8. ADMIN deletes -> 403
+DELETE http://localhost:8080/api/v1/flowers/{{flowerId}}
+Authorization: Bearer {{adminToken}}
+
+> {% client.test("8 -> 403", function () { client.assert(response.status === 403, "Got " + response.status); }); %}
+
+###
+
+### 9. SUPERADMIN deletes -> 204
+DELETE http://localhost:8080/api/v1/flowers/{{flowerId}}
+Authorization: Bearer {{superToken}}
+
+> {% client.test("9 -> 204", function () { client.assert(response.status === 204, "Got " + response.status); }); %}
+
+###
+
+### 10. SUPERADMIN audit -> 200
+GET http://localhost:8080/api/v1/audit
+Authorization: Bearer {{superToken}}
+
+> {% client.test("10 -> 200", function () { client.assert(response.status === 200, "Got " + response.status); }); %}
